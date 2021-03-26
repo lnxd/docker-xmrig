@@ -9,7 +9,7 @@ ENV MINERV="6.10.0"
 ENV APPS="curl tar gzip"
 
 # Prepare Alpine
-RUN apk add --no-cache ${APPS}; \
+RUN apk add --no-cache sudo ${APPS}; \
     adduser \
     --disabled-password \
     --gecos "" \

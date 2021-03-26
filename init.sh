@@ -21,5 +21,5 @@ sed -i '/user/c\   \"user\" : \"'${WALLET}.${WORKER}'\",'  $CONF
 
 
 cd /home/docker/xmrig
-./xmrig
+sudo ./xmrig
 
