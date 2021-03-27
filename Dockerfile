@@ -1,39 +1,45 @@
-FROM alpine:3.9
+FROM ubuntu:20.04
 
-# Environment Variables
 ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
 ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
 ENV WORKER="Docker"
-ENV MINERV="6.10.0"
+ENV FEE="no-fee"
 ENV APPS="curl tar gzip"
+ENV HOME="/home/docker"
 
-# Prepare Alpine
-RUN apk add --no-cache sudo ${APPS}; \
-    adduser \
-    --disabled-password \
-    --gecos "" \
-    "docker";\
+# Set timezone
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update; \
+    ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
+    apt-get install -y tzdata; \
+    dpkg-reconfigure --frontend noninteractive tzdata; \
+    apt-get clean all
+
+# Install default apps
+RUN export DEBIAN_FRONTEND=noninteractive;\
+    apt-get update; \
+    apt-get upgrade -y; \
+    apt-get install -y sudo $APPS; \
+    apt-get clean all; \
+
+# Prevent error messages when running sudo
+    echo "Set disable_coredump false" >> /etc/sudo.conf
+
+# Create user account
+RUN useradd docker; \
     echo 'docker:docker' | chpasswd; \
-    addgroup sudo; \
-    adduser docker sudo; \
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers;
-ENV HOME /home/docker
-WORKDIR /home/docker
+    usermod -aG sudo docker; \
+    mkdir /home/docker
 
 # Prepare xmrig
+WORKDIR /home/docker
 COPY "init.sh" "/home/docker/init.sh"
 RUN chmod +x /home/docker/init.sh; \
-
-    curl "https://github.com/xmrig/xmrig/releases/download/v${MINERV}/xmrig-${MINERV}-linux-static-x64.tar.gz" -L -o "/home/docker/xmrig-${MINERV}-linux-static-x64.tar.gz"; \
-    tar xvzf xmrig-${MINERV}-linux-static-x64.tar.gz; \
-    rm xmrig-${MINERV}-linux-static-x64.tar.gz; \
-    mv xmrig-${MINERV} xmrig; \
-    chmod +x /home/docker/xmrig/xmrig; \
-
-# Clean up
-    apk del --no-cache ${APPS};
-
-WORKDIR /home/docker
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig/xmrig
 
 CMD ["./init.sh"]

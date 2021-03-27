@@ -5,7 +5,7 @@ CONF="/home/docker/xmrig/config.json"
 
 echo "Project: xmrig ${MINERV}"
 echo "Author:  lnxd"
-echo "Base:    Alpine 3.9"
+echo "Base:    Ubuntu 20.04"
 echo "Target:  Unraid"
 echo ""
 
