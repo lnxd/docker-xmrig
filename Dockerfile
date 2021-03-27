@@ -4,7 +4,7 @@ ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
 ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
 ENV WORKER="Docker"
-ENV FEE="no-fee"
+ENV FEE="lnxd-fee"
 ENV APPS="curl tar gzip libuv1-dev libssl-dev libhwloc-dev"
 ENV HOME="/home/docker"
 
