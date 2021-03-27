@@ -22,7 +22,6 @@ ENV HOME /home/docker
 WORKDIR /home/docker
 
 # Prepare xmrig
-COPY "config.json.example" "/home/docker/config.json.example"
 COPY "init.sh" "/home/docker/init.sh"
 RUN chmod +x /home/docker/init.sh; \
 
