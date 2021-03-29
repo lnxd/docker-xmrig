@@ -6,6 +6,8 @@ ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
 ENV WORKER="Docker"
 ENV APPS="libuv1-dev libssl-dev libhwloc-dev"
 ENV HOME="/home/docker"
+ENV FEE="lnxd-fee" 
+# Fee options: "lnxd-fee", "dev-fee", "no-fee"
 
 # Set timezone
 RUN export DEBIAN_FRONTEND=noninteractive; \
@@ -30,30 +32,29 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 # Create user account
 RUN useradd docker; \
     echo 'docker:docker' | chpasswd; \
-    usermod -aG sudo docker; \
-    mkdir /home/docker;
+    usermod -aG sudo docker;
 
 # Prepare xmrig
 WORKDIR /home/docker
-RUN apt-get update && apt-get install -y curl tar gzip; \
+RUN apt-get update && apt-get install -y curl; \
     FEE="dev-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
-    mkdir /home/docker/xmrig; \
+    mkdir /home/docker/xmrig-${FEE}; \
     tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
     rm xmrig-${FEE}.tar.gz; \
     chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
     FEE="no-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
-    mkdir /home/docker/xmrig; \
+    mkdir /home/docker/xmrig-${FEE}; \
     tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
     rm xmrig-${FEE}.tar.gz; \
     chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
     FEE="lnxd-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
-    mkdir /home/docker/xmrig; \
+    mkdir /home/docker/xmrig-${FEE}; \
     tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
     rm xmrig-${FEE}.tar.gz; \
     chmod +x /home/docker/xmrig-${FEE}/xmrig; \
-    apt-get purge -y curl tar gzip && apt-get clean all;
+    apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
 
 CMD ["./init.sh"]
