@@ -1,39 +1,60 @@
-FROM alpine:3.9
+FROM ubuntu:20.04
 
-# Environment Variables
 ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
 ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
 ENV WORKER="Docker"
-ENV MINERV="6.10.0"
-ENV APPS="curl tar gzip"
+ENV APPS="libuv1-dev libssl-dev libhwloc-dev"
+ENV HOME="/home/docker"
+ENV FEE="lnxd-fee" 
+# Fee options: "lnxd-fee", "dev-fee", "no-fee"
 
-# Prepare Alpine
-RUN apk add --no-cache sudo ${APPS}; \
-    adduser \
-    --disabled-password \
-    --gecos "" \
-    "docker";\
+# Set timezone
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update; \
+    ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
+    apt-get install -y tzdata; \
+    dpkg-reconfigure --frontend noninteractive tzdata; \
+    apt-get clean all;
+
+# Install default apps
+COPY "init.sh" "/home/docker/init.sh"
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    chmod +x /home/docker/init.sh; \
+    apt-get update; \
+    apt-get upgrade -y; \
+    apt-get install -y sudo $APPS; \
+    apt-get clean all; \
+
+# Prevent error messages when running sudo
+    echo "Set disable_coredump false" >> /etc/sudo.conf;
+
+# Create user account
+RUN useradd docker; \
     echo 'docker:docker' | chpasswd; \
-    addgroup sudo; \
-    adduser docker sudo; \
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers;
-ENV HOME /home/docker
-WORKDIR /home/docker
+    usermod -aG sudo docker;
 
 # Prepare xmrig
-COPY "init.sh" "/home/docker/init.sh"
-RUN chmod +x /home/docker/init.sh; \
-
-    curl "https://github.com/xmrig/xmrig/releases/download/v${MINERV}/xmrig-${MINERV}-linux-static-x64.tar.gz" -L -o "/home/docker/xmrig-${MINERV}-linux-static-x64.tar.gz"; \
-    tar xvzf xmrig-${MINERV}-linux-static-x64.tar.gz; \
-    rm xmrig-${MINERV}-linux-static-x64.tar.gz; \
-    mv xmrig-${MINERV} xmrig; \
-    chmod +x /home/docker/xmrig/xmrig; \
-
-# Clean up
-    apk del --no-cache ${APPS};
-
 WORKDIR /home/docker
+RUN apt-get update && apt-get install -y curl; \
+    FEE="dev-fee"; \
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig-${FEE}; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
+    FEE="no-fee"; \
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig-${FEE}; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
+    FEE="lnxd-fee"; \
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig-${FEE}; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig-${FEE}/xmrig; \
+    apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
 
 CMD ["./init.sh"]
