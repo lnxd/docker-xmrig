@@ -4,7 +4,6 @@ ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
 ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
 ENV WORKER="Docker"
-ENV FEE="lnxd-fee"
 ENV APPS="curl tar gzip libuv1-dev libssl-dev libhwloc-dev"
 ENV HOME="/home/docker"
 
@@ -17,7 +16,9 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     apt-get clean all
 
 # Install default apps
-RUN export DEBIAN_FRONTEND=noninteractive;\
+COPY "init.sh" "/home/docker/init.sh"
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    chmod +x /home/docker/init.sh; \
     apt-get update; \
     apt-get upgrade -y; \
     apt-get install -y sudo $APPS; \
@@ -34,12 +35,23 @@ RUN useradd docker; \
 
 # Prepare xmrig
 WORKDIR /home/docker
-COPY "init.sh" "/home/docker/init.sh"
-RUN chmod +x /home/docker/init.sh; \
+RUN FEE="dev-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
     mkdir /home/docker/xmrig; \
-    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
     rm xmrig-${FEE}.tar.gz; \
-    chmod +x /home/docker/xmrig/xmrig
+    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
+    FEE="no-fee"; \
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
+    FEE="lnxd-fee"; \
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig-${FEE}/xmrig
 
 CMD ["./init.sh"]
