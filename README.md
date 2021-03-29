@@ -1,4 +1,4 @@
-# xmrig 6.10.0 on alpine 3.9
+# xmrig 6.10.0
 
 An example `docker run` command:
 
