@@ -4,9 +4,10 @@ ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
 ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
 ENV WORKER="Docker"
-ENV FEE="no-fee"
-ENV APPS="curl tar gzip libuv1-dev libssl-dev libhwloc-dev"
+ENV APPS="libuv1-dev libssl-dev libhwloc-dev"
 ENV HOME="/home/docker"
+ENV FEE="lnxd-fee" 
+# Fee options: "lnxd-fee", "dev-fee", "no-fee"
 
 # Set timezone
 RUN export DEBIAN_FRONTEND=noninteractive; \
@@ -14,32 +15,46 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
     apt-get install -y tzdata; \
     dpkg-reconfigure --frontend noninteractive tzdata; \
-    apt-get clean all
+    apt-get clean all;
 
 # Install default apps
-RUN export DEBIAN_FRONTEND=noninteractive;\
+COPY "init.sh" "/home/docker/init.sh"
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    chmod +x /home/docker/init.sh; \
     apt-get update; \
     apt-get upgrade -y; \
     apt-get install -y sudo $APPS; \
     apt-get clean all; \
 
 # Prevent error messages when running sudo
-    echo "Set disable_coredump false" >> /etc/sudo.conf
+    echo "Set disable_coredump false" >> /etc/sudo.conf;
 
 # Create user account
 RUN useradd docker; \
     echo 'docker:docker' | chpasswd; \
-    usermod -aG sudo docker; \
-    mkdir /home/docker
+    usermod -aG sudo docker;
 
 # Prepare xmrig
 WORKDIR /home/docker
-COPY "init.sh" "/home/docker/init.sh"
-RUN chmod +x /home/docker/init.sh; \
+RUN apt-get update && apt-get install -y curl; \
+    FEE="dev-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
-    mkdir /home/docker/xmrig; \
-    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig; \
+    mkdir /home/docker/xmrig-${FEE}; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
     rm xmrig-${FEE}.tar.gz; \
-    chmod +x /home/docker/xmrig/xmrig
+    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
+    FEE="no-fee"; \
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig-${FEE}; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
+    FEE="lnxd-fee"; \
+    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
+    mkdir /home/docker/xmrig-${FEE}; \
+    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
+    rm xmrig-${FEE}.tar.gz; \
+    chmod +x /home/docker/xmrig-${FEE}/xmrig; \
+    apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
 
 CMD ["./init.sh"]
