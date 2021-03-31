@@ -18,9 +18,9 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     apt-get clean all;
 
 # Install default apps
-COPY "init.sh" "/home/docker/init.sh"
+COPY "mine.sh" "/home/docker/mine.sh"
 RUN export DEBIAN_FRONTEND=noninteractive; \
-    chmod +x /home/docker/init.sh; \
+    chmod +x /home/docker/mine.sh; \
     apt-get update; \
     apt-get upgrade -y; \
     apt-get install -y sudo $APPS; \
@@ -57,4 +57,4 @@ RUN apt-get update && apt-get install -y curl; \
     chmod +x /home/docker/xmrig-${FEE}/xmrig; \
     apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
 
-CMD ["./init.sh"]
+CMD ["./mine.sh"]
