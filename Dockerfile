@@ -25,12 +25,11 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     apt-get upgrade -y; \
     apt-get install -y sudo $APPS; \
     apt-get clean all; \
-
-# Prevent error messages when running sudo
-    echo "Set disable_coredump false" >> /etc/sudo.conf;
+    # Prevent error messages when running sudo
+    echo "Set disable_coredump false" >> /etc/sudo.conf; 
 
 # Create user account
-RUN useradd docker; \
+RUN useradd --uid 99 --guid 98 docker; \
     echo 'docker:docker' | chpasswd; \
     usermod -aG sudo docker;
 
@@ -56,5 +55,7 @@ RUN apt-get update && apt-get install -y curl; \
     rm xmrig-${FEE}.tar.gz; \
     chmod +x /home/docker/xmrig-${FEE}/xmrig; \
     apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
+
+USER docker
 
 CMD ["./mine.sh"]
