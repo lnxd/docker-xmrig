@@ -17,6 +17,12 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     dpkg-reconfigure --frontend noninteractive tzdata; \
     apt-get clean all;
 
+# Create user account
+RUN groupadd -g 98 docker; \
+    useradd --uid 99 --gid 98 docker; \
+    echo 'docker:docker' | chpasswd; \
+    usermod -aG sudo docker;
+
 # Install default apps
 COPY "mine.sh" "/home/docker/mine.sh"
 RUN export DEBIAN_FRONTEND=noninteractive; \
@@ -27,12 +33,6 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     apt-get clean all; \
     # Prevent error messages when running sudo
     echo "Set disable_coredump false" >> /etc/sudo.conf; 
-
-# Create user account
-RUN groupadd -g 98 docker; \
-    useradd --uid 99 --gid 98 docker; \
-    echo 'docker:docker' | chpasswd; \
-    usermod -aG sudo docker;
 
 # Prepare xmrig
 WORKDIR /home/docker
