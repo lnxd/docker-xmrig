@@ -29,7 +29,8 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     echo "Set disable_coredump false" >> /etc/sudo.conf; 
 
 # Create user account
-RUN useradd --uid 99 --gid 98 docker; \
+RUN groupadd -g 98 docker; \
+    useradd --uid 99 --gid 98 docker; \
     echo 'docker:docker' | chpasswd; \
     usermod -aG sudo docker;
 
