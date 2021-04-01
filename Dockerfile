@@ -9,16 +9,15 @@ ENV HOME="/home/docker"
 ENV FEE="lnxd-fee" 
 # Fee options: "lnxd-fee", "dev-fee", "no-fee"
 
-# Set timezone
+# Set timezone and create user
 RUN export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
     ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
     apt-get install -y tzdata; \
     dpkg-reconfigure --frontend noninteractive tzdata; \
-    apt-get clean all;
-
-# Create user account
-RUN groupadd -g 98 docker; \
+    apt-get clean all; \
+    # Create user account
+    groupadd -g 98 docker; \
     useradd --uid 99 --gid 98 docker; \
     echo 'docker:docker' | chpasswd; \
     usermod -aG sudo docker;
