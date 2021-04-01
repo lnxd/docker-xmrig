@@ -10,5 +10,5 @@ echo "Running xmrig with the following flags:"
 echo "--url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} ${ADDITIONAL}"
 
 cd /home/docker/xmrig-${FEE}
-sudo ./xmrig --url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --donate-level=${DONATE} ${ADDITIONAL}
+./xmrig --url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --donate-level=${DONATE} ${ADDITIONAL}
 
