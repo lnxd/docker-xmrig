@@ -56,6 +56,6 @@ RUN apt-get update && apt-get install -y curl; \
     chmod +x /home/docker/xmrig-${FEE}/xmrig; \
     apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
 
-USER root
+USER docker
 
 CMD ["./mine.sh"]
