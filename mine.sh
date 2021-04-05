@@ -11,8 +11,7 @@ echo "--url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} ${ADDITIONAL}"
 echo ""
 cd /home/docker/xmrig-${FEE}
 if [ $SUDO = "true" ]; then
-  echo "Running as sudo."
-  sudo ./xmrig --url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --donate-level=${DONATE} ${ADDITIONAL}
+   sudo ./xmrig --url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --donate-level=${DONATE} ${ADDITIONAL}
 else
   ./xmrig --url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --donate-level=${DONATE} ${ADDITIONAL}
 fi
