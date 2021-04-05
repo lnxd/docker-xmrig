@@ -35,7 +35,7 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 
 # Prepare xmrig
 WORKDIR /home/docker
-RUN apt-get update && apt-get install -y curl; \
+RUN apt-get update && apt-get install -y curl msr-tools; \
     FEE="dev-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
     mkdir /home/docker/xmrig-${FEE}; \
