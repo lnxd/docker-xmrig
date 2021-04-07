@@ -10,7 +10,7 @@ echo ""
 echo "(don't!) blame lnxd if something goes wrong"
 echo ""
 curl -fsSL https://packages.slackonly.com/pub/packages/14.2-x86_64/system/msr-tools/msr-tools-${VERSION}-x86_64-1_slonly.txz -o /tmp/msr-tools-${VERSION}-x86_64-1_slonly.txz
-upgradepkg --install /tmp/msr-tools-${VERSION}-x86_64-1_slonly.txz
+upgradepkg --install-new /tmp/msr-tools-${VERSION}-x86_64-1_slonly.txz
 rm /tmp/msr-tools-${VERSION}-x86_64-1_slonly.txz
 
 echo ""
