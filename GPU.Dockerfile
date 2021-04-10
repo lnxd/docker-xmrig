@@ -61,7 +61,7 @@ ARG AMD_DRIVER=amdgpu-pro-20.45-1188099-ubuntu-20.04.tar.xz
 ARG AMD_DRIVER_URL=https://drivers.amd.com/drivers/linux
 RUN mkdir -p /tmp/opencl-driver-amd
 WORKDIR /tmp/opencl-driver-amd
-RUN apt-get update && apt-get install -y curl xz-utils; \
+RUN apt-get update && apt-get install -y curl xz-utils ocl-icd-opencl-dev; \
     echo AMD_DRIVER is $AMD_DRIVER; \
     curl --referer $AMD_DRIVER_URL -O $AMD_DRIVER_URL/$AMD_DRIVER; \
     tar -Jxvf $AMD_DRIVER; \
