@@ -71,6 +71,7 @@ RUN apt-get update && apt-get install -y curl xz-utils; \
     rm -rf /tmp/opencl-driver-amd; \
     apt-get purge -y curl xz-utils && apt-get autoremove -y && apt-get clean all;
 
-USER docker
+WORKDIR /home/docker
+USER root
 
 CMD ["./mine.sh"]
