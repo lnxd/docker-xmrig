@@ -65,7 +65,7 @@ if [[ "${DRIVERV}" != "" ]]; then
         INSTALLED_DRIVERV="20.50"
         ;;
 
-    Cuda)
+    CUDA)
         uninstall_amd_driver
         apt-get update && apt-get install -y software-properties-common wget gnupg2
         wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
