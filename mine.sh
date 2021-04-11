@@ -76,7 +76,6 @@ echo "Base:         Ubuntu 20.04"
 echo "Target:       Unraid 6.9.0 - 6.9.2"
 echo "Donation:     ${FEE} ${DONATE}%"
 echo "Driver:       $INSTALLED_DRIVERV"
-echo "OpenCL Path: "$(find / -name "/usr/lib/x86_64-linux-gnu/libOpenCL.so" 2>&1 | grep "libOpenCL.so")
 echo ""
 echo "Running xmrig with the following flags:"
 echo "--url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --randomx-wrmsr=-1 --randomx-no-rdmsr ${ADDITIONAL}"

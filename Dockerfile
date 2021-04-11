@@ -21,7 +21,7 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     chmod +x /home/docker/start.sh; \
     apt-get update; \
     apt-get upgrade -y; \
-    apt-get install -y libuv1-dev libssl-dev libhwloc-dev curl libpci3 xz-utils; \
+    apt-get install -y --no-install-recommends libuv1-dev libssl-dev libhwloc-dev curl libpci3 xz-utils; \
     apt-get autoremove -y; \
     apt-get clean all;
 
