@@ -12,16 +12,13 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 RUN export DEBIAN_FRONTEND=noninteractive;\
     apt-get update; \
     apt-get upgrade -y; \
-    apt-get install -y sudo apt-utils git build-essential cmake automake libtool autoconf libuv1-dev libssl-dev libhwloc-dev; \
-    apt-get clean all; \
-
-# Prevent error messages when running sudo
-    echo "Set disable_coredump false" >> /etc/sudo.conf
+    apt-get install -y apt-utils; \
+    apt-get install -y wget git build-essential cmake automake libtool autoconf libuv1-dev libssl-dev libhwloc-dev; \
+    apt-get clean all;
 
 # Create user account
 RUN useradd docker; \
     echo 'docker:docker' | chpasswd; \
-    usermod -aG sudo docker; \
     mkdir /home/docker
 
 # Set environment variables.
