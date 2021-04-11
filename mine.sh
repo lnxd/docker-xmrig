@@ -68,18 +68,16 @@ if [[ "${INSTALLED_DRIVERV}" != "${DRIVERV}" ]]; then
 
 fi
 
-echo "Project:  xmrig ${MINERV}"
-echo "Author:   lnxd"
-echo "Base:     Ubuntu 20.04"
-echo "Target:   Unraid 6.9.0 - 6.9.2"
-echo "Driver:  $INSTALLED_DRIVERV"
-echo "Donation: ${FEE} ${DONATE}%"
+echo "Project:      xmrig ${MINERV}"
+echo "Author:       lnxd"
+echo "Base:         Ubuntu 20.04"
+echo "Target:       Unraid 6.9.0 - 6.9.2"
+echo "Donation:     ${FEE} ${DONATE}%"
+echo "Driver:       $INSTALLED_DRIVERV"
+echo "OpenCL Path: "$(find / -name "/usr/lib/x86_64-linux-gnu/libOpenCL.so" 2>&1 | grep "libOpenCL.so")
 echo ""
 echo "Running xmrig with the following flags:"
 echo "--url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --randomx-wrmsr=-1 --randomx-no-rdmsr ${ADDITIONAL}"
-echo ""
-echo "OpenCL Path: "
-find / -name "/usr/lib/x86_64-linux-gnu/libOpenCL.so" | grep "libOpenCL.so"
 echo ""
 cd /home/docker/xmrig-${FEE}
 ./xmrig --url=${POOL} --coin=${COIN} --user=${WALLET}.${WORKER} --donate-level=${DONATE} --randomx-wrmsr=-1 --randomx-no-rdmsr ${ADDITIONAL}
