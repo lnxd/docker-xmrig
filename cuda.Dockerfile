@@ -154,7 +154,11 @@ RUN chmod +x /home/docker/xmrig-dev-fee/xmrig ; \
     chmod +x /home/docker/xmrig-no-fee/xmrig; \
     ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-dev-fee/libxmrig-cuda.so; \
     ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-lnxd-fee/libxmrig-cuda.so; \
-    ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-no-fee/libxmrig-cuda.so; 
+    ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-no-fee/libxmrig-cuda.so; \
+    ln -s /usr/local/cuda-11.2/compat/libcuda.so.1 /home/docker/xmrig-dev-fee/libcuda.so.1; \
+    ln -s /usr/local/cuda-11.2/compat/libcuda.so.1 /home/docker/xmrig-lnxd-fee/libcuda.so.1; \
+    ln -s /usr/local/cuda-11.2/compat/libcuda.so.1 /home/docker/xmrig-no-fee/libcuda.so.1; 
+
 
 ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
