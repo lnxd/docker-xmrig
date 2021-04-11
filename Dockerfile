@@ -145,15 +145,16 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 
 # Prepare xmrig
 WORKDIR /home/docker
+COPY --from=xmrig-cuda /home/docker/xmrig-cuda/build/libxmrig-cuda.so /home/docker/libxmrig-cuda.so
 COPY --from=xmrig-dev-fee /home/docker/xmrig/build/xmrig /home/docker/xmrig-dev-fee/xmrig
-COPY --from=xmrig-cuda /home/docker/xmrig-cuda/build/libxmrig-cuda.so /home/docker/xmrig-dev-fee/libxmrig-cuda.so
 COPY --from=xmrig-lnxd-fee /home/docker/xmrig/build/xmrig /home/docker/xmrig-lnxd-fee/xmrig
-COPY --from=xmrig-cuda /home/docker/xmrig-cuda/build/libxmrig-cuda.so /home/docker/xmrig-lnxd-fee/libxmrig-cuda.so
 COPY --from=xmrig-no-fee /home/docker/xmrig/build/xmrig /home/docker/xmrig-no-fee/xmrig
-COPY --from=xmrig-cuda /home/docker/xmrig-cuda/build/libxmrig-cuda.so /home/docker/xmrig-no-fee/libxmrig-cuda.so
 RUN chmod +x /home/docker/xmrig-dev-fee/xmrig ; \
     chmod +x /home/docker/xmrig-lnxd-fee/xmrig; \
-    chmod +x /home/docker/xmrig-no-fee/xmrig;
+    chmod +x /home/docker/xmrig-no-fee/xmrig; \
+    ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-dev-fee/libxmrig-cuda.so; \
+    ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-lnxd-fee/libxmrig-cuda.so; \
+    ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-no-fee/libxmrig-cuda.so; 
 
 ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
