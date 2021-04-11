@@ -27,6 +27,10 @@ ENV HOME /home/docker
 # Define working directory.
 WORKDIR /home/docker
 
+###############
+#  Build dev  #
+###############
+
 FROM xmrig-build-base AS xmrig-dev-fee
 
 ENV SOURCE="--depth 1 https://github.com/lnxd/xmrig.git"
@@ -36,6 +40,10 @@ RUN git clone $SOURCE; \
     ./build_deps.sh && cd ../build; \
     cmake .. -DXMRIG_DEPS=scripts/deps; \
     make -j$(nproc)
+
+###############
+#  Build lnxd #
+###############
 
 FROM xmrig-build-base AS xmrig-lnxd-fee
 
@@ -47,6 +55,10 @@ RUN git clone $SOURCE; \
     cmake .. -DXMRIG_DEPS=scripts/deps; \
     make -j$(nproc)
 
+###############
+#   Build no  #
+###############
+
 FROM xmrig-build-base AS xmrig-no-fee
 
 ENV SOURCE="--depth 1 --branch no-fee https://github.com/lnxd/xmrig.git"
@@ -56,6 +68,53 @@ RUN git clone $SOURCE; \
     ./build_deps.sh && cd ../build; \
     cmake .. -DXMRIG_DEPS=scripts/deps; \
     make -j$(nproc)
+
+###############
+#  Build Cuda #
+###############
+
+FROM nvidia/cuda:11.2.2-devel-ubuntu20.04 AS xmrig-cuda
+
+ENV SOURCE="https://github.com/xmrig/xmrig-cuda.git"
+
+# Set timezone
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update; \
+    ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
+    apt-get install -y tzdata; \
+    dpkg-reconfigure --frontend noninteractive tzdata; \
+    apt-get clean all
+
+# Install default apps
+RUN export DEBIAN_FRONTEND=noninteractive;\
+    apt-get update; \
+    apt-get upgrade -y; \
+    apt-get install -y apt-utils; \
+    apt-get install -y git build-essential cmake automake libtool autoconf libuv1-dev libssl-dev libhwloc-dev; \
+    apt-get clean all;
+
+# Create user account
+RUN useradd docker; \
+    echo 'docker:docker' | chpasswd; \
+    usermod -aG sudo docker; \
+    mkdir /home/docker
+
+# Set environment variables.
+ENV HOME /home/docker
+
+# Define working directory.
+WORKDIR /home/docker
+
+RUN echo "Running git clone ${SOURCE}"; \
+    git clone $SOURCE; \
+    mkdir xmrig-cuda/build && cd xmrig-cuda/build; \
+    cmake .. -DCUDA_LIB=/usr/local/cuda/lib64/stubs/libcuda.so -DCUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda; \
+    make -j$(nproc); \
+    ls -lh
+
+###############
+#  Build Main #
+###############
 
 FROM ubuntu:20.04
 
