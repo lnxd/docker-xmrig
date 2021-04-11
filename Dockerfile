@@ -20,8 +20,7 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     # Create user account
     groupadd -g 98 docker; \
     useradd --uid 99 --gid 98 docker; \
-    echo 'docker:docker' | chpasswd; \
-    usermod -aG sudo docker;
+    echo 'docker:docker' | chpasswd;
 
 # Install default apps
 # Copy latest scripts
@@ -32,15 +31,12 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     chmod +x /home/docker/start.sh; \
     apt-get update; \
     apt-get upgrade -y; \
-    apt-get install -y sudo $APPS; \
+    apt-get install -y $APPS; \
     apt-get clean all; \
-    # Prevent error messages when running sudo
-    echo "Set disable_coredump false" >> /etc/sudo.conf; 
 
 # Prepare xmrig
 WORKDIR /home/docker
-RUN apt-get update && apt-get install -y curl; \
-    FEE="dev-fee"; \
+RUN FEE="dev-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
     mkdir /home/docker/xmrig-${FEE}; \
     tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
@@ -58,7 +54,6 @@ RUN apt-get update && apt-get install -y curl; \
     tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
     rm xmrig-${FEE}.tar.gz; \
     chmod +x /home/docker/xmrig-${FEE}/xmrig; \
-    apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
 
 USER docker
 
