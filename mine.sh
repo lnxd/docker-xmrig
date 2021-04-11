@@ -68,6 +68,7 @@ if [[ "${DRIVERV}" != "" ]]; then
     nvidia)
         uninstall_driver
         apt-get install -y nvidia-headless-$NVIDIA_DRIVERV
+        apt-get install -y --no-install-recommends nvidia-cuda-toolkit
         INSTALLED_DRIVERV="NVIDIA"
         ;;
 
