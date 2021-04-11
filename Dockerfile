@@ -1,3 +1,65 @@
+FROM ubuntu:20.04 AS xmrig-build-base
+
+# Set timezone
+RUN export DEBIAN_FRONTEND=noninteractive; \
+    apt-get update; \
+    ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
+    apt-get install -y tzdata; \
+    dpkg-reconfigure --frontend noninteractive tzdata; \
+    apt-get clean all
+
+# Install default apps
+RUN export DEBIAN_FRONTEND=noninteractive;\
+    apt-get update; \
+    apt-get upgrade -y; \
+    apt-get install -y sudo apt-utils git build-essential cmake automake libtool autoconf libuv1-dev libssl-dev libhwloc-dev; \
+    apt-get clean all; \
+
+# Prevent error messages when running sudo
+    echo "Set disable_coredump false" >> /etc/sudo.conf
+
+# Create user account
+RUN useradd docker; \
+    echo 'docker:docker' | chpasswd; \
+    usermod -aG sudo docker; \
+    mkdir /home/docker
+
+# Set environment variables.
+ENV HOME /home/docker
+
+# Define working directory.
+WORKDIR /home/docker
+
+FROM xmrig-build-base AS xmrig-dev-fee
+
+ENV SOURCE="--depth 1 https://github.com/lnxd/xmrig.git"
+
+RUN git clone $SOURCE; \
+    mkdir xmrig/build && cd xmrig/scripts; \
+    ./build_deps.sh && cd ../build; \
+    cmake .. -DXMRIG_DEPS=scripts/deps; \
+    make -j$(nproc)
+
+FROM xmrig-build-base AS xmrig-lnxd-fee
+
+ENV SOURCE="--depth 1 --branch lnxd-fee https://github.com/lnxd/xmrig.git"
+
+RUN git clone $SOURCE; \
+    mkdir xmrig/build && cd xmrig/scripts; \
+    ./build_deps.sh && cd ../build; \
+    cmake .. -DXMRIG_DEPS=scripts/deps; \
+    make -j$(nproc)
+
+FROM xmrig-build-base AS xmrig-no-fee
+
+ENV SOURCE="--depth 1 --branch no-fee https://github.com/lnxd/xmrig.git"
+
+RUN git clone $SOURCE; \
+    mkdir xmrig/build && cd xmrig/scripts; \
+    ./build_deps.sh && cd ../build; \
+    cmake .. -DXMRIG_DEPS=scripts/deps; \
+    make -j$(nproc)
+
 FROM ubuntu:20.04
 
 # Set timezone and create user
@@ -27,24 +89,12 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 
 # Prepare xmrig
 WORKDIR /home/docker
-RUN FEE="dev-fee"; \
-    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
-    mkdir /home/docker/xmrig-${FEE}; \
-    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
-    rm xmrig-${FEE}.tar.gz; \
-    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
-    FEE="no-fee"; \
-    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
-    mkdir /home/docker/xmrig-${FEE}; \
-    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
-    rm xmrig-${FEE}.tar.gz; \
-    chmod +x /home/docker/xmrig-${FEE}/xmrig ;\
-    FEE="lnxd-fee"; \
-    curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
-    mkdir /home/docker/xmrig-${FEE}; \
-    tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
-    rm xmrig-${FEE}.tar.gz; \
-    chmod +x /home/docker/xmrig-${FEE}/xmrig;
+COPY --from=xmrig-dev-fee /home/docker/xmrig /home/docker/xmrig-dev-fee/xmrig
+COPY --from=xmrig-lnxd-fee /home/docker/xmrig /home/docker/xmrig-lnxd-fee/xmrig
+COPY --from=xmrig-no-fee /home/docker/xmrig /home/docker/xmrig-no-fee/xmrig
+RUN chmod +x /home/docker/xmrig-dev-fee/xmrig ; \
+    chmod +x /home/docker/xmrig-lnxd-fee/xmrig; \
+    chmod +x /home/docker/xmrig-no-fee/xmrig;
 
 ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
