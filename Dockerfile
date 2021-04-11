@@ -4,9 +4,10 @@ ENV COIN="monero"
 ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
 ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
 ENV WORKER="Docker"
-ENV APPS="libuv1-dev libssl-dev libhwloc-dev"
+ENV APPS="libuv1-dev libssl-dev libhwloc-dev curl libpci3 xz-utils"
 ENV HOME="/home/docker"
 ENV FEE="lnxd-fee" 
+ENV DRIVERV=""
 # Fee options: "lnxd-fee", "dev-fee", "no-fee"
 
 # Set timezone and create user
@@ -23,9 +24,12 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     usermod -aG sudo docker;
 
 # Install default apps
-COPY "mine.sh" "/home/docker/mine.sh"
+# Copy latest scripts
+COPY start.sh /home/docker/start.sh
+COPY mine.sh /home/docker/mine.sh
 RUN export DEBIAN_FRONTEND=noninteractive; \
     chmod +x /home/docker/mine.sh; \
+    chmod +x /home/docker/start.sh; \
     apt-get update; \
     apt-get upgrade -y; \
     apt-get install -y sudo $APPS; \
