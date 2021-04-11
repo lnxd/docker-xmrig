@@ -67,7 +67,7 @@ if [[ "${DRIVERV}" != "" ]]; then
 
     nvidia)
         uninstall_driver
-        apt-get install -y nvidia-driver-460
+        apt-get install -y nvidia-headless-$NVIDIA_DRIVERV
         INSTALLED_DRIVERV="NVIDIA"
         ;;
 
