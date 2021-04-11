@@ -1,5 +1,14 @@
 FROM ubuntu:20.04
 
+ENV COIN="monero"
+ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
+ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
+ENV WORKER="Docker"
+ENV APPS="libuv1-dev libssl-dev libhwloc-dev"
+ENV HOME="/home/docker"
+ENV FEE="lnxd-fee" 
+# Fee options: "lnxd-fee", "dev-fee", "no-fee"
+
 # Set timezone and create user
 RUN export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
@@ -10,24 +19,24 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
     # Create user account
     groupadd -g 98 docker; \
     useradd --uid 99 --gid 98 docker; \
-    echo 'docker:docker' | chpasswd;
+    echo 'docker:docker' | chpasswd; \
+    usermod -aG sudo docker;
 
 # Install default apps
-# Copy latest scripts
-COPY start.sh /home/docker/start.sh
-COPY mine.sh /home/docker/mine.sh
+COPY "mine.sh" "/home/docker/mine.sh"
 RUN export DEBIAN_FRONTEND=noninteractive; \
     chmod +x /home/docker/mine.sh; \
-    chmod +x /home/docker/start.sh; \
     apt-get update; \
     apt-get upgrade -y; \
-    apt-get install -y --no-install-recommends libuv1-dev libssl-dev libhwloc-dev curl libpci3 xz-utils; \
-    apt-get autoremove -y; \
-    apt-get clean all;
+    apt-get install -y sudo $APPS; \
+    apt-get clean all; \
+    # Prevent error messages when running sudo
+    echo "Set disable_coredump false" >> /etc/sudo.conf; 
 
 # Prepare xmrig
 WORKDIR /home/docker
-RUN FEE="dev-fee"; \
+RUN apt-get update && apt-get install -y curl; \
+    FEE="dev-fee"; \
     curl "https://github.com/lnxd/xmrig/releases/download/v6.10.0/xmrig-${FEE}.tar.gz" -L -o "/home/docker/xmrig-${FEE}.tar.gz"; \
     mkdir /home/docker/xmrig-${FEE}; \
     tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
@@ -44,17 +53,25 @@ RUN FEE="dev-fee"; \
     mkdir /home/docker/xmrig-${FEE}; \
     tar xvzf xmrig-${FEE}.tar.gz -C /home/docker/xmrig-${FEE}; \
     rm xmrig-${FEE}.tar.gz; \
-    chmod +x /home/docker/xmrig-${FEE}/xmrig;
+    chmod +x /home/docker/xmrig-${FEE}/xmrig; \
+    apt-get purge -y curl && apt-get autoremove -y && apt-get clean all;
 
-ENV COIN="monero"
-ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
-ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
-ENV WORKER="Docker"
-ENV HOME="/home/docker"
-ENV FEE="lnxd-fee" 
-ENV DRIVERV=""
-# Fee options: "lnxd-fee", "dev-fee", "no-fee"
+# Install amdgpu drivers
+ARG AMD_DRIVER=amdgpu-pro-20.45-1188099-ubuntu-20.04.tar.xz
+ARG AMD_DRIVER_URL=https://drivers.amd.com/drivers/linux
+RUN mkdir -p /tmp/opencl-driver-amd
+WORKDIR /tmp/opencl-driver-amd
+RUN apt-get update && apt-get install -y curl xz-utils ocl-icd-opencl-dev; \
+    echo AMD_DRIVER is $AMD_DRIVER; \
+    curl --referer $AMD_DRIVER_URL -O $AMD_DRIVER_URL/$AMD_DRIVER; \
+    tar -Jxvf $AMD_DRIVER; \
+    cd amdgpu-pro-*; \
+    ./amdgpu-install; \
+    apt-get install opencl-amdgpu-pro -y; \
+    rm -rf /tmp/opencl-driver-amd; \
+    apt-get purge -y curl xz-utils && apt-get autoremove -y && apt-get clean all;
 
+WORKDIR /home/docker
 USER root
 
 CMD ["./mine.sh"]
