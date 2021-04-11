@@ -1,6 +1,7 @@
 #!/bin/bash
 uninstall_amd_driver() {
     echo "Uninstalling driver"
+    apt-get purge -y nvidia-driver* && apt-get autoremove -y
     echo 'APT::Get::Assume-Yes "true";' >>/etc/apt/apt.conf.d/90assumeyes
     /usr/bin/amdgpu-uninstall
     rm /etc/apt/apt.conf.d/90assumeyes
@@ -36,33 +37,40 @@ if [[ "${DRIVERV}" != "" ]]; then
     case $DRIVERV in
 
     0)
-        uninstall_amd_driver
+        uninstall_driver
         echo "Skipping installation"
         ;;
 
     18.20)
-        uninstall_amd_driver
+        uninstall_driver
         install_amd_driver "amdgpu-pro-18.20-621984.tar.xz" "https://drivers.amd.com/drivers/linux/ubuntu-18-04" "--opencl=legacy,pal --headless"
         INSTALLED_DRIVERV="18.20"
         ;;
 
     20.20)
-        uninstall_amd_driver
+        uninstall_driver
         install_amd_driver "amdgpu-pro-20.20-1098277-ubuntu-20.04.tar.xz" "https://drivers.amd.com/drivers/linux" "--opencl=legacy,pal --headless --no-dkms"
         INSTALLED_DRIVERV="20.20"
         ;;
 
     20.45)
-        uninstall_amd_driver
+        uninstall_driver
         install_amd_driver "amdgpu-pro-20.45-1188099-ubuntu-20.04.tar.xz" "https://drivers.amd.com/drivers/linux" "--opencl=legacy,pal --headless --no-dkms"
         INSTALLED_DRIVERV="20.45"
         ;;
 
     20.50)
-        uninstall_amd_driver
+        uninstall_driver
         install_amd_driver "amdgpu-pro-20.50-1234664-ubuntu-20.04.tar.xz" "https://drivers.amd.com/drivers/linux" "--opencl=legacy,rocr --headless --no-dkms"
         INSTALLED_DRIVERV="20.50"
         ;;
+
+    nvidia)
+        uninstall_driver
+        apt-get install -y nvidia-driver-460
+        INSTALLED_DRIVERV="NVIDIA"
+        ;;
+
     *)
         INSTALLED_DRIVERV="No AMD Drivers Installed"
         ;;
