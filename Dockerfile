@@ -117,7 +117,7 @@ RUN echo "Running git clone ${SOURCE}"; \
 #  Build Main #
 ###############
 
-FROM ubuntu:${BASE:-20.04}
+FROM nvidia/cuda:11.2.2-devel-ubuntu20.04
 
 # Set timezone and create user
 RUN export DEBIAN_FRONTEND=noninteractive; \
