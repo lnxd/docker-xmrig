@@ -1,25 +1,26 @@
-FROM ubuntu:20.04 AS xmrig-build-base
+ARG BASE
 
-# Set timezone
-RUN export DEBIAN_FRONTEND=noninteractive; \
-    apt-get update; \
-    ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
-    apt-get install -y tzdata; \
-    dpkg-reconfigure --frontend noninteractive tzdata; \
-    apt-get clean all
+FROM ubuntu:${BASE:-20.04} AS xmrig-build-base
 
 # Install default apps
-RUN export DEBIAN_FRONTEND=noninteractive;\
+RUN export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
     apt-get upgrade -y; \
     apt-get install -y apt-utils; \
-    apt-get install -y wget git build-essential cmake automake libtool autoconf libuv1-dev libssl-dev libhwloc-dev; \
-    apt-get clean all;
-
+    apt-get install -y curl sudo libpci3 xz-utils wget kmod git build-essential cmake automake libtool autoconf libuv1-dev libssl-dev libhwloc-dev; \
+# Clean up apt
+    apt-get clean all; \
+# Set timezone
+    ln -fs /usr/share/zoneinfo/Australia/Melbourne /etc/localtime; \
+    apt-get install -y tzdata; \
+    dpkg-reconfigure --frontend noninteractive tzdata; \
+# Prevent error messages when running sudo
+    echo "Set disable_coredump false" >> /etc/sudo.conf; \
 # Create user account
-RUN useradd docker; \
-    echo 'docker:docker' | chpasswd; \
-    mkdir /home/docker
+    useradd docker; \
+    echo 'docker:docker' | sudo chpasswd; \
+    usermod -aG sudo docker; \
+    mkdir /home/docker;
 
 # Set environment variables.
 ENV HOME /home/docker
@@ -116,7 +117,7 @@ RUN echo "Running git clone ${SOURCE}"; \
 #  Build Main #
 ###############
 
-FROM ubuntu:20.04
+FROM ubuntu:${BASE:-20.04}
 
 # Set timezone and create user
 RUN export DEBIAN_FRONTEND=noninteractive; \
@@ -132,11 +133,11 @@ RUN export DEBIAN_FRONTEND=noninteractive; \
 
 # Install default apps
 # Copy latest scripts
-COPY start.sh /home/docker/start.sh
-COPY mine.sh /home/docker/mine.sh
-RUN export DEBIAN_FRONTEND=noninteractive; \
+COPY start.sh mine.sh custom-mine.sh /home/docker/
+RUN chmod +x /home/docker/start.sh; \
     chmod +x /home/docker/mine.sh; \
-    chmod +x /home/docker/start.sh; \
+    chmod +x /home/docker/custom-mine.sh; \
+    export DEBIAN_FRONTEND=noninteractive; \
     apt-get update; \
     apt-get upgrade -y; \
     apt-get install -y --no-install-recommends libuv1-dev libssl-dev libhwloc-dev curl ca-certificates libpci3 xz-utils; \
@@ -157,8 +158,8 @@ RUN chmod +x /home/docker/xmrig-dev-fee/xmrig ; \
     ln -s /home/docker/libxmrig-cuda.so /home/docker/xmrig-no-fee/libxmrig-cuda.so; 
 
 ENV COIN="monero"
-ENV POOL="randomxmonero.usa-west.nicehash.com:3380"
-ENV WALLET="3QGJuiEBVHcHkHQMXWY4KZm63vx1dEjDpL"
+ENV POOL="xmr.2miners.com:2222"
+ENV WALLET="84e8UJvXHDGVfE5HZDQfhn3Kh3RGJKebz31G7D4H24TLPMe9x7bQLBw8iyBhNx9USXB8MhvhBe3DyVW1LcuVAf4jBiADNLw"
 ENV WORKER="Docker"
 ENV HOME="/home/docker"
 ENV FEE="lnxd-fee" 

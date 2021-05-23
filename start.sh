@@ -43,13 +43,13 @@ install_amd_driver() {
 	cd /home/docker/
 	rm -rf /tmp/opencl-driver-amd
 	echo "---AMD Driver installation finished---"
-	INSTALLED_DRIVERV=$(cd /home/docker/phoenixminer && ./PhoenixMiner -list | grep -m 1 "OpenCL driver version" | sed 's/OpenCL driver version: //g' | cut -c1-5)
+	INSTALLED_DRIVERV=0
 	rm /etc/apt/apt.conf.d/90assumeyes
 }
 
-INSTALLED_DRIVERV=$(cd /home/docker/phoenixminer && ./PhoenixMiner -list | grep -m 1 "OpenCL driver version" | sed 's/OpenCL driver version: //g' | cut -c1-5)
+INSTALLED_DRIVERV=0
 
-if [[ "${INSTALLED_DRIVERV}" != "${DRIVERV:-20.20}" ]]; then
+if [[ "${INSTALLED_DRIVERV}" != "${DRIVERV:-0}" ]]; then
 
 	case $DRIVERV in
 
