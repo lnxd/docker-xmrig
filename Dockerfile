@@ -168,4 +168,4 @@ ENV DRIVERV=""
 
 USER root
 
-CMD ["./mine.sh"]
+CMD ["./start.sh"]
